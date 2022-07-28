@@ -11,6 +11,7 @@ import (
 	"github.com/migalabs/armiarma/src/utils/apis"
 
 	libp2p "github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p/p2p/protocol/identify"
@@ -34,7 +35,7 @@ type BasicLibp2pHost struct {
 	Network string
 	// Basic sevices related with the libp2p host
 	host      host.Host
-	identify  *identify.IDService
+	identify  identify.IDService
 	PeerStore *db.PeerStore
 	IpLocator *apis.PeerLocalizer
 
@@ -70,11 +71,16 @@ func NewBasicLibp2pEth2Host(ctx context.Context, infObj info.Eth2InfoData, ipLoc
 	}
 	log.Debugf("setting multiaddress to %s", muladdr)
 
+	pk, err := crypto.UnmarshalSecp256k1PrivateKey(privkey.D.Bytes())
+	if err != nil {
+		// xxx
+		panic(err)
+	}
+
 	// Generate the main Libp2p host that will be exposed to the network
 	host, err := libp2p.New(
-		ctx,
 		libp2p.ListenAddrs(muladdr),
-		libp2p.Identity(privkey),
+		libp2p.Identity(pk),
 		libp2p.UserAgent(userAgent),
 		libp2p.Transport(tcp_transport.NewTCPTransport),
 		libp2p.Security(noise.ID, noise.New),
@@ -136,7 +142,6 @@ func NewBasicLibp2pIpfsHost(ctx context.Context, infObj info.IpfsInfoData, ipLoc
 
 	// Generate the main Libp2p host that will be exposed to the network
 	host, err := libp2p.New(
-		ctx,
 		libp2p.Identity(privkey),
 		libp2p.ListenAddrs(muladdr),
 		libp2p.Ping(true),

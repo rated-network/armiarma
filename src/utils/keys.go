@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"encoding/hex"
+	"math/big"
 	"strings"
 
 	gcrypto "github.com/ethereum/go-ethereum/crypto"
@@ -28,11 +29,11 @@ func ParsePrivateKey(v string) (*crypto.Secp256k1PrivateKey, error) {
 		return nil, err
 	}
 	key := (priv).(*crypto.Secp256k1PrivateKey)
-	key.Curve = gcrypto.S256()              // Temporary hack, so libp2p Secp256k1 is recognized as geth Secp256k1 in disc v5.1
-	if !key.Curve.IsOnCurve(key.X, key.Y) { // TODO: should we be checking this?
-		log.Debugf("invalid private key, not on curve")
-		return nil, nil
-	}
+	// key.Curve = gcrypto.S256()              // Temporary hack, so libp2p Secp256k1 is recognized as geth Secp256k1 in disc v5.1
+	// if !key.Curve.IsOnCurve(key.X, key.Y) { // TODO: should we be checking this?
+	// 	log.Debugf("invalid private key, not on curve")
+	// 	return nil, nil
+	// }
 	return key, nil
 }
 
@@ -49,20 +50,29 @@ func PrivKeyToString(input_key *crypto.Secp256k1PrivateKey) string {
 	return hex.EncodeToString(keyBytes)
 }
 
-func GeneratePrivKey() string {
+// taken from Prysm
+func ConvertFromInterfacePrivKey(privkey crypto.PrivKey) (*ecdsa.PrivateKey, error) {
+	secpKey := (privkey.(*crypto.Secp256k1PrivateKey))
+	rawKey, err := secpKey.Raw()
+	if err != nil {
+		return nil, err
+	}
+	privKey := new(ecdsa.PrivateKey)
+	k := new(big.Int).SetBytes(rawKey)
+	privKey.D = k
+	privKey.Curve = gcrypto.S256() // Temporary hack, so libp2p Secp256k1 is recognized as geth Secp256k1 in disc v5.1.
+	privKey.X, privKey.Y = gcrypto.S256().ScalarBaseMult(rawKey)
+	return privKey, nil
+}
 
-	key, err := ecdsa.GenerateKey(gcrypto.S256(), rand.Reader)
-
+func GeneratePrivKey() *ecdsa.PrivateKey {
+	priv, _, err := crypto.GenerateSecp256k1Key(rand.Reader)
 	if err != nil {
 		log.Panicf("failed to generate key: %v", err)
 	}
-
-	secpKey := (*crypto.Secp256k1PrivateKey)(key)
-
-	keyBytes, err := secpKey.Raw()
-
+	k, err := ConvertFromInterfacePrivKey(priv)
 	if err != nil {
-		log.Panicf("failed to serialize key: %v", err)
+		panic(err)
 	}
-	return hex.EncodeToString(keyBytes)
+	return k
 }

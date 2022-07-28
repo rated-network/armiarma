@@ -17,9 +17,9 @@ import (
 	"net"
 	"os"
 
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"github.com/pkg/errors"
 
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/migalabs/armiarma/src/db/models"
 	"github.com/migalabs/armiarma/src/discovery"
 	"github.com/migalabs/armiarma/src/enode"
@@ -158,7 +158,10 @@ func (d *Discovery) handleENR(node *ethenode.Node) (models.Peer, error) {
 
 	// Get the public key and the peer.ID of the discovered peer
 	pubkey := node.Pubkey()
-	peerid, err := peer.IDFromPublicKey(crypto.PubKey((*crypto.Secp256k1PublicKey)((*btcec.PublicKey)(pubkey))))
+	var x, y secp256k1.FieldVal
+	x.SetBytes((*[32]byte)(pubkey.X.Bytes()))
+	y.SetBytes((*[32]byte)(pubkey.Y.Bytes()))
+	peerid, err := peer.IDFromPublicKey(crypto.PubKey((*crypto.Secp256k1PublicKey)(secp256k1.NewPublicKey(&x, &y))))
 	if err != nil {
 		return models.Peer{}, fmt.Errorf("error extracting peer.ID from node %s", node.ID())
 	}

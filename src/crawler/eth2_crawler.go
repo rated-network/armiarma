@@ -4,8 +4,6 @@
 package crawler
 
 import (
-	"crypto/ecdsa"
-
 	cli "github.com/urfave/cli/v2"
 
 	"github.com/migalabs/armiarma/src/db"
@@ -76,7 +74,7 @@ func NewEth2Crawler(ctx *cli.Context, infObj info.Eth2InfoData) (*Eth2Crawler, e
 	dv5, err := dv5.NewDiscovery(
 		ctx.Context,
 		node,
-		(*ecdsa.PrivateKey)(infObj.PrivateKey),
+		infObj.PrivateKey,
 		dv5bootnodes,
 		infObj.ForkDigest,
 		9006)

@@ -136,7 +136,8 @@ func IPFSinfoFromConfig(inputConfig config.ConfigData) IpfsInfoData {
 	err := i.SetPrivKeyFromString(inputConfig.PrivateKey)
 	if err != nil {
 		log.Warnf("%s. Generating a new one", err.Error())
-		i.SetPrivKeyFromString(utils.GeneratePrivKey())
+		// xxx
+		//		i.SetPrivKeyFromString(utils.GeneratePrivKey())
 	}
 	log.Infof("Private Key of the host: %s", i.GetPrivKeyString())
 

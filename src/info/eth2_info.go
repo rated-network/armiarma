@@ -14,7 +14,7 @@ package info
 
 import (
 	"context"
-	"errors"
+	"crypto/ecdsa"
 	"fmt"
 	"net"
 	"os"
@@ -22,7 +22,6 @@ import (
 
 	cli "github.com/urfave/cli/v2"
 
-	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/migalabs/armiarma/src/config"
 	"github.com/migalabs/armiarma/src/gossipsub/blockchaintopics"
 	"github.com/migalabs/armiarma/src/utils"
@@ -49,7 +48,7 @@ type Eth2InfoData struct {
 	DbEndpoint    string
 	Eth2endpoint  string
 	LogLevel      string
-	PrivateKey    *crypto.Secp256k1PrivateKey
+	PrivateKey    *ecdsa.PrivateKey
 	BootNodesFile string
 	OutputPath    string
 }
@@ -193,12 +192,12 @@ func Eth2infoFromConfig(inputConfig config.ConfigData) Eth2InfoData {
 	}
 
 	// Private Key
-	err := i.SetPrivKeyFromString(inputConfig.PrivateKey)
-	if err != nil {
-		log.Warnf("%s. Generating a new one", err.Error())
-		i.SetPrivKeyFromString(utils.GeneratePrivKey())
-	}
-	log.Infof("Private Key of the host: %s", i.GetPrivKeyString())
+	// xxx removed check for existing key
+	log.Warnf("Generating a new private key")
+	i.PrivateKey = utils.GeneratePrivKey()
+
+	// xxx
+	// log.Infof("Private Key of the host: %s", i.GetPrivKeyString())
 
 	// BootNodesFile
 	if !utils.CheckFileExists(inputConfig.BootNodesFile) {
@@ -312,17 +311,17 @@ func (i Eth2InfoData) checkValidLogLevel(input_level string) bool {
 	return false
 }
 
-func (i Eth2InfoData) GetPrivKeyString() string {
-	return utils.PrivKeyToString(i.PrivateKey)
-}
+// func (i Eth2InfoData) GetPrivKeyString() string {
+// 	return utils.PrivKeyToString(i.PrivateKey)
+// }
 
-func (i *Eth2InfoData) SetPrivKeyFromString(input_key string) error {
-	parsed_key, err := utils.ParsePrivateKey(input_key)
+// func (i *Eth2InfoData) SetPrivKeyFromString(input_key string) error {
+// 	parsed_key, err := utils.ParsePrivateKey(input_key)
 
-	if err != nil {
-		error_string := "Could not parse Private Key"
-		return errors.New(error_string)
-	}
-	i.PrivateKey = parsed_key
-	return nil
-}
+// 	if err != nil {
+// 		error_string := "Could not parse Private Key"
+// 		return errors.New(error_string)
+// 	}
+// 	i.PrivateKey = parsed_key
+// 	return nil
+// }

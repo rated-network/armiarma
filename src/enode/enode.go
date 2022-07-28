@@ -2,7 +2,6 @@ package enode
 
 import (
 	"context"
-	"crypto/ecdsa"
 
 	"github.com/ethereum/go-ethereum/p2p/enode"
 	"github.com/migalabs/armiarma/src/info"
@@ -39,7 +38,7 @@ func NewLocalNode(ctx context.Context, infObj *info.Eth2InfoData) *LocalNode {
 
 	return &LocalNode{
 		ctx:       ctx,
-		LocalNode: *enode.NewLocalNode(new_db, (*ecdsa.PrivateKey)(infObj.PrivateKey)),
+		LocalNode: *enode.NewLocalNode(new_db, infObj.PrivateKey),
 		info_data: infObj,
 	}
 }
