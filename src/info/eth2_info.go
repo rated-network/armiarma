@@ -18,6 +18,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/pkg/errors"
@@ -88,6 +89,7 @@ func Eth2infoFromConfig(inputConfig config.ConfigData) Eth2InfoData {
 	}
 
 	logrus.SetLevel(utils.ParseLogLevel(i.LogLevel))
+	logrus.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339Nano})
 
 	// start full import
 	log.Infof("Importing Configuration...")

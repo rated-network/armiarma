@@ -35,14 +35,13 @@ func (aee AttnetsENREntry) ENRKey() string {
 // With this entry we allow the node to have a registered fork digest
 type Eth2ENREntry []byte
 
-func NewEth2DataEntry(input_bytes string) Eth2ENREntry {
-	result, err := hex.DecodeString(input_bytes)
-
-	if err != nil {
-		return nil
+func NewEth2DataEntry(eth2data beacon.Eth2Data) (*Eth2ENREntry, error) {
+	var buf bytes.Buffer
+	if err := eth2data.Serialize(codec.NewEncodingWriter(&buf)); err != nil {
+		return nil, err
 	}
-
-	return result
+	e := Eth2ENREntry(buf.Bytes())
+	return &e, nil
 }
 
 func (eee Eth2ENREntry) ENRKey() string {

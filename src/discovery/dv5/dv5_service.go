@@ -154,6 +154,8 @@ func (d *Discovery) handleENR(node *ethenode.Node) (models.Peer, error) {
 		return models.Peer{}, fmt.Errorf("got ENR with other fork digest: %s", eth2Dat.ForkDigest.String())
 	}
 
+	log.Infof("eth2 data: fork digest %s, nextforkversion %s, nextforkepoch %s", eth2Dat.ForkDigest.String(), eth2Dat.NextForkVersion.String(), eth2Dat.NextForkEpoch.String())
+
 	// Get the public key and the peer.ID of the discovered peer
 	pubkey, _ := utils.ConvertToInterfacePubkey(node.Pubkey())
 

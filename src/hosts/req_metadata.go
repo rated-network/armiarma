@@ -217,6 +217,7 @@ func ReqHostInfo(ctx context.Context, wg *sync.WaitGroup, h host.Host, ipLoc *ap
 	} else {
 		// EDGY CASE: when peers refuse the connection, the callback gets called and the identify protocol
 		// returns an empty struct (we are unable to identify them)
+		log.Debugf("unable to identify peer %s, error: %s", conn.RemotePeer().String(), err.Error())
 		finErr = errors.Errorf("unable to identify peer")
 		peer.MetadataSucceed = false
 	}

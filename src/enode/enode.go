@@ -7,6 +7,8 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/enode"
 	"github.com/migalabs/armiarma/src/info"
 	all_utils "github.com/migalabs/armiarma/src/utils"
+	beacon "github.com/protolambda/zrnt/eth2/beacon/common"
+	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/sirupsen/logrus"
 )
 
@@ -48,8 +50,14 @@ func NewLocalNode(ctx context.Context, infObj *info.Eth2InfoData, pk *ecdsa.Priv
 // This method will add specific Eth2 Key Value entries to the created Node.
 // TODO: confirm which data to add and structure appropiately
 func (l *LocalNode) AddEntries() {
-	l.LocalNode.Set(all_utils.NewAttnetsENREntry("ffffffffffffffff"))
-	l.LocalNode.Set(all_utils.NewEth2DataEntry("b5303f2a"))
+	l.LocalNode.Set(all_utils.NewAttnetsENREntry("0000000000000000"))
+
+	eth2data, _ := all_utils.NewEth2DataEntry(beacon.Eth2Data{
+		ForkDigest:      beacon.ForkDigest{0xaf, 0xca, 0xab, 0xa0},
+		NextForkVersion: configs.Mainnet.BELLATRIX_FORK_VERSION,
+		NextForkEpoch:   beacon.FAR_FUTURE_EPOCH,
+	})
+	l.LocalNode.Set(eth2data)
 }
 
 // getters and setters
